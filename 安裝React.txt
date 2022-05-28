@@ -1,0 +1,17 @@
+1. npm i react react-dom
+2. npm install --save-dev @babel/preset-react 編譯react jsx  preset-react @babel/preset-react
+3. 
+    {
+        test: /\.(js|jsx)$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+            loader: 'babel-loader',
+            //如果 options 配置太雜的話可以拉到根目錄創一支 babel.config.js。
+            options: {
+                presets: ["@babel/preset-env", "@babel/preset-react"]
+            }
+        }
+    }
+
+4. npm i redux or @reduxjs/toolkit react-redux !!!redux 跟 react-redux無關聯只是用來聯繫react與redux的關係
+5. redux-logger 可觀察redux變化

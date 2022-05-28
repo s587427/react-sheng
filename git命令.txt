@@ -1,0 +1,66 @@
+git --version
+clear
+git config --global user.name ="xxx"
+git config --global user.mail ="xxx"
+git init
+ll
+ll -la
+--常用命令
+get add demo.txt 
+git commit -m "提交訊息"
+git status --查看狀態
+git log --紀錄太多下一頁空格 上一頁b到 退出q 頁尾顯示end
+git log --pretty=oneline
+git log --oneline
+git reflog
+get reset --hard 索引值 本地庫指針動的同時，重製暫存區與工作區
+get reset --mixed 索引值 本地庫指針動的同時，重製暫存區但是工作區不動
+get reset --soft 索引值 本地庫指針動的同時，暫存區與工作區都不動
+rm
+git diff [文件可選] 默認為比對所有工作區與暫存區的資料
+git diff [歷史版本當前版本填入HEAD][文件可選] 默認為比對所有本地庫與暫存區的資料
+--分支
+git branch -v
+git branch 分支名稱  --新增分支
+git checkout 分支名稱 --切換分支
+cat 文件名
+--甚麼時後會出現衝突?在同一個文件的同一個位置修改
+修改玩後add-> commit(不可帶文件名)
+mkdir 目錄名
+
+--創建遠程庫
+1.在本地庫弄好git專案
+2.傳給遠程庫地址 https://github.com/s587427/GitResp2.git
+
+
+
+git clone [遠程庫地址]
+	1.初始化本地庫
+	2.將遠程庫內容完整的克隆到本地
+	3.替我們創建遠程庫的別名
+
+git remote -v --查看遠程庫地址有沒有別名
+git remote add [別名] [遠程庫地址] (以後可以用別名存取遠程庫就不用打網址) 
+		ex: git remote add origin[別名] https://github.com/s587427/GitResp2.git[遠程庫地址]
+
+--推送操作
+git push [遠程庫地址或別名] [分支名稱] 
+
+git pull [遠程庫別名][分支名稱] = fetch + merge
+
+git fetch [遠程庫地址或別名] [分支名稱]  --只是將遠程庫內容下載到本地，但是工作區還是原先的內容
+		ex: git push origin master
+
+
+
+在衝突情況下先拉下來解決在push上去
+
+--免密操作
+1.進入用戶主目錄中 
+cd ~
+ssh-keygen -t -rsa -C github信箱
+
+
+
+
+

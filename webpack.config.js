@@ -1,0 +1,77 @@
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+module.exports = {
+     //模式
+    mode: process.env.NODE_ENV,
+    //進入點
+    entry: {
+        bundle: './src/index.js',
+    },
+    //輸出設定
+    output: {
+        filename: '[name].[hash].js',   
+        //path 因為要兼容不同的系統環境，欄位需填寫絕對路徑，__dirname 為 Node 的環境下附屬的，可以取得當下資料夾的絕對路徑，path.resolve 則是把資料夾的絕對路徑和產出的 dist 資料夾合併起來
+        path: path.resolve(__dirname, 'dist'),            
+    },
+    plugins: [
+        //js檔抽離css
+        new MiniCssExtractPlugin({
+          filename: 'css/[name].css', // 為一般列在 entry 檔內打包出來的檔案。
+          chunkFilename: 'css/[id].css', // 為未被列在 entry 檔內但也需要打包的檔案。
+        }),
+        //每次編譯前，都要先刪掉舊檔案。
+        new CleanWebpackPlugin(),
+        //動態塞入不同的內容進入一隻 HTML
+        new HtmlWebpackPlugin({
+            template: './src/index.html', //要使用的模板，通常會使用動態資料傳入一隻 HTML。
+            filename: 'index.html', //匯出檔案的名稱。
+            title: 'React-demo',
+            hello: '是在 hello ?',
+        }),
+    ],
+    //load配置
+    module: {
+        rules:[
+            {
+                test: /\.css$/i,
+                use: [{
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                        publicPath: '../'
+                    }
+                },
+                'css-loader',
+                'postcss-loader' //會自己去尋找設定檔postcss.config.js
+                ],
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                loader: 'file-loader',
+                options: {
+                  outputPath: 'image',
+                  name: '[name].[ext]',
+                },
+            },
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                    loader: 'babel-loader',
+                    //如果 options 配置太雜的話可以拉到根目錄創一支 babel.config.js。
+                    // options: {
+                    //     presets: ["@babel/preset-env", "@babel/preset-react"]
+                    // }
+                }
+            }
+        ]
+    },
+    //配置webpack-dev-server webpack5 自帶熱更新
+    devServer: {
+        static: path.join(__dirname, 'dist'),
+        port: 9000,
+        compress: false,
+        open: true,
+    }
+}

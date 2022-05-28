@@ -1,0 +1,242 @@
+簡單的配置流程
+    1. npm init -y 安裝 npm 套件管理工具
+    2. npm install webpack webpack-cli --save-dev 安裝 webpack，dev 代表安裝在開發環境。
+    3. 新增 index.html 與 /src/index.js 在我們的專案下，src 資料夾放開發用檔案。
+    4. 新增 webpack 配置文件 webpack.config.js，可以看到有幾個屬性
+        entry：webpack 打包的注入點，通常只會有一個檔案
+        output：打包出來的等等設定
+        filename：檔案名稱
+        path：輸出路徑
+
+    5. 編輯package.json，在 scripts 處加上我們的 webpack 運行指令。
+    6. 在終端機打上 npm run build 後，可以看到專案下多了一個 dist 資料夾，裡面存了一隻 bundle.js 檔案，打開檔案拉到最後可以看到我們寫的 code, 最後把我們 HTML 檔案裡的 script 改掉就能夠運行摟！
+
+優化配置
+    1. 添加mode
+    2. 但每次打包前都要改 mode 實在是太麻煩了，也因此有個東西叫做環境變數，我們先把 mode 改為以下： process.env.NODE_ENV, 這樣就可以在運行的時候偵測從 package.json 帶過去的值，也當然我們必須更改 package.json 為：
+        "serve": "NODE_ENV=development webpack",
+        "build": "NODE_ENV=production webpack",
+        !!! 如果使用 windows 系統開發的話，你可能會發現根本取不到環境變數啊（Ｘ這時候就需要在專案裡多安裝一個套件 cross-env $ npm install --save-dev cross-env, 並且在環境變數前加上 cross-env：
+            "serve": "cross-env NODE_ENV=development webpack",
+            "build": "cross-env NODE_ENV=production webpack", 
+
+    3. 開發不中斷 有使用過 CLI 建置專案過的話，一定知道每次儲存完網頁都會自動更新，但目前每改一次就要打一次指令非常麻煩，這時候我們在 package.json 的 script 裡加上 --watch 就可以持續編譯了！
+
+    4. CSS loader & plugin
+        4-1. 優化配置 - 檔名變化
+            當我們每次編譯後，都會出現一直名為 bundle.js 的 JS 檔，但…如果今天我的 entry 想要不只一個檔案的話該怎麼辦呢？ 我們先來新增第二隻 utils.js 內容隨便寫個：
+                接著我們在 webpack.config.js 裡調整一下：
+                    我們把 entry 改寫為物件，filename 變為 [name].js，這邊的 [name] 會對應到 entry 的 key 名稱，這時候我們再編譯一次
+        
+        4-2. loder & plugin 介紹
+            loader: loader 存在的原因是為了讓 webpack 可以讀取不同的程式碼。
+            plugin: plugin 則是豐富了 webpack 的功能
+
+        4-3. CSS 編譯 npm install --save-dev css-loader style-loader
+
+            首先來小試身手，試著編譯 CSS 檔案。編譯 CSS 檔常伴隨著兩個 loader
+                css-loader => 做的是解析 CSS
+                style-loader => 則是做編譯匯出的部分。
+            接著一樣在 webpack.config.js 加上以下設定：
+                添加在modue:{}裡面 rules: [
+                    {
+                        test: /\.css$/i,
+                        use: ['style-loader', 'css-loader'], //這邊要講一下其實 use 陣列裡是有順序的，從右至左，先使用 css-loader 做 CSS 解析，再使用 style-loader 編譯。
+                    },
+                ],
+            創建index.css在 ./src/css/index.css 並且寫上一點 CSS, 在我們設定的 entry ，也就是 index.js 內引入 CSS： const index = require('./css/index.css')
+                這樣我們就只需要做最後一步：npm run build 打開 dist/bundle.js，可以看到剛剛寫的 CSS 已經透過引入被編譯出來：
+                但…我寫的是 CSS 怎麼會被編譯到 JS 檔裡呢？ 其實根據不同需求，可以選擇你要不要插在 JS 檔裡或是把 CSS 抽出來
+                抽出的話網頁就會多請求一個檔案，沒抽出下 JS 檔就會比較肥大。
+                當然，這時候要介紹個常伴隨 CSS 編譯的一個 plugin mini-css-extract-plugin 
+
+                mini-css-extract-plugin: 這個 plugin 就是幫助我們在編譯時抽離 CSS，舊專案的話你可能會比較常看到 Extract Text Plugin 這個，兩個做的事情是一樣的，只是目前後者在慢慢淘汰。
+                    1. npm install --save-dev mini-css-extract-plugin
+                    2. 接著引入 webpack.config.js，並且把 style-loader 替換掉：
+                    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+                    module.exports = {
+                            plugins: [new MiniCssExtractPlugin()],
+                            module: {
+                                rules: [
+                                {
+                                    test: /\.css$/i,
+                                    use: [MiniCssExtractPlugin.loader, 'css-loader'],
+                                },
+                                ],
+                            },
+                        };
+                    3.再重新編譯一次，就可以看到 dist 資料夾內跑出 CSS 檔啦！ 因為剛剛 output 的設置，檔案名稱會自動對應到我們在 entry 檔案的 key，我們在 index.js 引入 CSS 的，所以名稱就對應到 index.css。
+       
+        4-4. file-loader
+            1. 添加圖片在以下資料夾 ./src/assets/img.jpg
+            2. 在index.css body { background-image: url('/src/assets/demo.png') }
+                從上回看到這邊可以隱約發現一個通用習慣：
+                開發時都用 src 資料夾來存放檔案，透過編譯才變成 dist 一包。所以…統整一下現在遇到的問題：
+                => CSS 路徑一樣是指向 src 開發用資料夾
+                => 就算改了路徑，圖片也依然存在於 src 資料夾裡
+            3. 也就是說我們少了一個可以讓 webpack 讀取圖片的 loader，接下來就是讓 file-loader 出場的時候了： npm install file-loader --save-dev
+                => webpack.config.js 設定檔：
+                    module.exports = {
+                        module: {
+                            rules: [
+                            {
+                                test: /\.(png|jpe?g|gif)$/i,
+                                loader: 'file-loader',
+                                options: {
+                                outputPath: 'image',
+                                name: '[name].[ext]',
+                                },
+                            },
+                            ],
+                        },
+                    };
+            4.這邊來小總結一次：
+                4-1. CSS 檔案先透過 css-loader 解析 CSS 語法
+                4-2. 遇到相對路徑後交由 file-loader 來解析，並且把檔案搬到目標 dist 資料夾
+                4-3. 最後再由 mini-css-extract-plugin 去修正圖片的路徑。
+                4-4. 圖片路徑錯誤 : 這邊要另外補充一點跟圖片有關的，如果在 mini-css-extract-plugin 內設定過 filename，而且 CSS 不是編譯在 dist 根目錄的話：
+                    => module.exports = {
+                            plugins: [
+                                new MiniCssExtractPlugin({
+                                filename: 'css/[name].css',
+                                chunkFilename: 'css/[id].css',
+                                }),
+                            ]
+                    };
+                    !!!!會發現根本吃不到圖片，這也是在打包部署常出現的一件事！因為默認情況下，圖片會是相對 dist 資料夾的根目錄，所以要去更改 publicPath 這個屬性。
+                    module.exports = {
+                        module: {
+                            rules: [
+                            {
+                                test: /\.css$/i,
+                                use: [{
+                                loader: MiniCssExtractPlugin.loader,
+                                options: {
+                                    publicPath: '../'
+                                }
+                                }, 'css-loader'],
+                            },
+                            ]
+                        }
+                    }
+            
+            5. html-webpack-plugin & devServer
+                => 逃離瀏覽器快取
+                    也因此 webpack 有提供編譯時在檔名上加上 hash 的功能
+                    output: {
+                        filename: '[name].[hash].js',
+                        path: path.resolve(__dirname, 'dist')
+                    }
+                    把剛剛的 [name].js 加上 [hash] 的話，只要有檔案改動，就會產生出不同 hash 值。
+                => clean-webpack-plugin
+                    1.在剛剛設置完 hash 後，會發現第一個問題：每次編譯前，都要先刪掉舊檔案。而這個插件主要是幫助我們在編譯時候刪除 dist 資料夾，直接來安裝：
+                    2.npm install --save-dev clean-webpack-plugin
+                    接著在 webpack.config.js 內使用就會自動清除 dist 資料夾了。
+                        const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+                        module.exports = {
+                            plugins: [
+                                new CleanWebpackPlugin(),
+                            ],
+                        }
+                => html-webpack-plugin - 動態注入
+                    index.html 的 script 和 link 路徑檔名要一直手動改。
+                    這插件可以讓我們可以在 HTML 內塞入動態資料來達成目的，而這也是 SPA 頁面用到的核心「動態塞入不同的內容進入一隻 HTML」。
+                    1. npm install html-webpack-plugin --save-dev
+                    2. 接著一樣在 webpack.config.js 做設定：
+                        const HtmlWebpackPlugin = require('html-webpack-plugin')
+                        module.exports = {
+                            plugins: [
+                                new HtmlWebpackPlugin({
+                                    template: './src/index.html', //要使用的模板，通常會使用動態資料傳入一隻 HTML。
+                                    filename: index.html, //匯出檔案的名稱。
+                                })
+                            ]
+                        }
+                    3. 在編譯後可以看到 webpack 自動幫我們把有進入 entry 的都連結上 HTML 了
+                    4. 動態注入 <%= htmlWebpackPlugin.options.xxx %>
+                => devServer  - 熱模組更新 - 內網連線
+ 
+                    一. webpack-dev-server
+                        --目前的開發模式是透過 webpack --watch 來監聽檔案變動重新編譯，但編譯後我們還是要用一些工具去開啟 dist 資料夾。這邊要介紹一個更方便的工具
+                        1. npm install webpack-dev-server --save-dev
+                        2. 接著更改 package.json 配置，把 serve 處由 webpack 改為 webpack-dev-server，因為只會在開發時使用，也當然 build 就不需要改了。
+                        3. 除了在 command line 加上設定：webpack-dev-server --color --compress --port 9000
+                           也可以像這樣在 webpack.config.js 配置 devServer：                          
+                            module.exports = {
+                                devServer: {
+                                    static: path.join(__dirname, 'dist'), //靜態文件路徑
+                                    port: 9000,
+                                    compress: false,
+                                    open: true
+                                    compress boolean = false 啟用 gzip 壓縮。
+                                }
+                            }
+                            常用屬性如下
+                                inline boolean = true 使用行內模式。false 為 iframe 模式。
+                                host string = 'localhost' 指定 host。設定 0.0.0.0 可以讓同個網域下的不同裝置訪問。
+                                useLocalIp boolean = false 使用內網 IP 打開網頁。
+                                port number = 8080監聽埠號。
+                                hot boolean = false 啟用 webpack 熱模組更新（Hot Module Replacement）。
+                                open boolean = false 啟動時自動開啟網頁。
+                                overlay boolean = false 報錯是否覆蓋全螢幕。
+                                proxy object [object, function] 代理，可以在開發模式解決同源政策問題。
+                                https boolean object 使用安全連線。
+                                stats string: 'none' | 'errors-only' | 'minimal' | 'normal' | 'verbose' object可以控制終端機顯示的編譯訊息。
+                                clientLogLevel string = 'info': 'silent' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'none' | 'warning' 當使用行內模式時，會在偵錯工具下 log 出訊息。Ex: 重整瀏覽器前、報錯前 or 啟用熱模組前。
+
+                    二. 熱模組更新
+                        其中熱模組更新 ( HMR - hot module replacement ) 是非常好用的，他會自動重新渲染改過的部分，透過這點可以節省非常多的開發時間。
+                        要開啟的話，必須引入 webpack 裡的兩個插件，並且 hot 與 line 模式必須為 true：
+                        plugins: [
+                            new webpack.HotModuleReplacementPlugin(),
+                            new webpack.NamedModulesPlugin(),
+                        ]
+                        --內網連線
+                            文件內有提到 port 設置為 0.0.0.0 的話可以讓同個網域下的不同裝置連上網頁。此時如果手邊有手機也連同個網路的話，可以輸入 host 加上 port 口就能連上網頁了！
+                            想跳過查詢 IP 的步驟的話可以把 useLocalIp 設為 true，當打開 server 時就會以內網 IP 顯示在網址列了！
+
+                        --延伸閱讀 hash & chunkhash & contenthash
+                            hash：會跟整個專案相關，只要檔案變更過後就會換一次
+                            chunkhash：跟 entry 的設定相關，假如我只更改 entry2 的話只有 2 會變更， entry1 不會變更檔名，瀏覽器就不用重新請求 entry1。
+                            contenthash：上面是跟 entry 相關，contenthash 則是跟檔案相關，只要檔案沒變更就不會重新計算 hash。
+
+相容工具
+    CSS 相容 - Autoprefixer
+        1.先來談談 PostCSS，他是以 JavaScript 打造用來編譯 CSS 的方便工具。點開官網可以看到大致上分為幾個方向：
+            Autoprefixer：幫 CSS 補上前綴，不用再擔心一堆瀏覽器的前綴。
+                -webkit-：Google、Safari、新版 Opera …等等
+                -moz-：Firefox
+                -o-：舊版 Opera
+                -ms-：IE & Edge 
+                --npm install autoprefixer postcss-loader --save-dev
+            PostCSS Preset Env：編譯最新的 CSS 給舊瀏覽器相容。
+            CSS Modules：主要是解決 CSS 全域污染問題，像是 Vue 的 Scoped。
+            stylelint：CSS 的 ESLint。
+            LostGrid：把格線系統 grid 編譯成 calc() 給舊瀏覽器支援。
+
+            後處理器（Postprocessors） PostCSS, 寫 CSS 再來做編譯
+            預處理器（Preprocessors）的 Sass、Less、Stylus 是寫很像 CSS 的語法編譯成 CSS 兩者沒有衝突可以自由搭配。
+
+    JavaScript 相容 - BABEL   
+        BABEL 在 JavaScript 上一直支持著我們寫新的語法，並且幫助我們編譯成相容舊瀏覽器的語法。
+        看官網的話，會發現他是可以單用就直接編譯出來，但我們今天要朝向和 webpack 一起做搭配使用，要進入 webpack，當然就必須安裝 babel-loader。
+        => npm install -D babel-loader @babel/core @babel/preset-env
+        => @babel/core 為核心
+        => @babel/preset-env 讓我們直接寫 JS 最新語法都沒問題。
+        => 在沒有指定瀏覽器的狀況下，BABEL 會把所有 ES6 以上的語法都編譯過。
+
+    瀏覽器版本設定- Browserslist
+        上面兩個只要貼上基本設定，就會自動編譯好。我們可以透過統計顧客的瀏覽器版本，來個別設定 target 指定要編譯的瀏覽器版本。但…工具越來越多，假如今天編譯版本要從 IE10 升級到 Edge 15 的話，不就要每個都設定一遍嗎？
+        也因為這樣，我們需要有個像是變數的功能，可以統整瀏覽器版本的工具。
+        1.在根目錄創一支設定檔為 .browserslistrc，根據官網推薦最佳寫法為： defaults 
+            或是可以選擇寫在 package.json 裡：
+                "browserslist": [
+                "defaults"
+            ]
+            default 又等於：
+            > 0.5%
+            last 2 versions //編譯成瀏覽器的最新兩個版本
+            Firefox ESR
+            not dead //一年內有官方消息或更新的瀏覽器。
+        2.在設定 browserslist 瀏覽器版本後，可以透過一些插件來檢查目前的 JS 或 CSS 有哪些不支援，需要另外安裝 polyfill。
