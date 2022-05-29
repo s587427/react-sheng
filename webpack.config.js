@@ -13,7 +13,8 @@ module.exports = {
     output: {
         filename: '[name].[hash].js',   
         //path 因為要兼容不同的系統環境，欄位需填寫絕對路徑，__dirname 為 Node 的環境下附屬的，可以取得當下資料夾的絕對路徑，path.resolve 則是把資料夾的絕對路徑和產出的 dist 資料夾合併起來
-        path: path.resolve(__dirname, 'dist'),            
+        path: path.resolve(__dirname, 'dist'),   
+        publicPath : '/' , //配置此選項解決css lost in react neasted router v6         
     },
     plugins: [
         //js檔抽離css
@@ -73,5 +74,6 @@ module.exports = {
         port: 9000,
         compress: false,
         open: true,
+        historyApiFallback: true, //单页应用(SPA)一般只有一个index.html, 导航的跳转都是基于HTML5 History API，当用户在越过index.html 页面直接访问这个地址或是通过浏览器的刷新按钮重新获取时，就会出现404问题；配置此選項解決
     }
 }
