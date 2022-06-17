@@ -5,6 +5,7 @@ import {BrowserRouter} from 'react-router-dom'
 import './css/index.css'
 import store from './redux/store'
 import App from './App.jsx'
+import Hookform from "./App-react-hook-form.jsx";
 
 
 
@@ -14,7 +15,8 @@ const root = createRoot(rootElement);
 root.render(
     <Provider store={store}>
         <BrowserRouter>
-            <App/>
+            {/* <App/> */}
+            <Hookform/>
         </BrowserRouter>   
     </Provider>
 )
