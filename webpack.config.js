@@ -75,5 +75,10 @@ module.exports = {
         compress: false,
         open: true,
         historyApiFallback: true, //单页应用(SPA)一般只有一个index.html, 导航的跳转都是基于HTML5 History API，当用户在越过index.html 页面直接访问这个地址或是通过浏览器的刷新按钮重新获取时，就会出现404问题；配置此選項解決
+    },
+    resolve: {
+        fallback: {
+            "fs": false
+        },
     }
 }

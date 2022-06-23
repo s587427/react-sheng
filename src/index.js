@@ -14,7 +14,8 @@ const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
 
 //console.log(yield all[...Object.values(sagasfn)])
-
+var file = require("./lib/ggg.js");
+console.log(file)
 
 root.render(
     <Provider store={store}>

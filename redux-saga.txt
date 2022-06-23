@@ -11,3 +11,4 @@ call(fn, ...args) call 不只可以調用一個 function 並回傳 Promise，我
 take(pattern)
 put(action)
 all 副作用函數來同時運行多個saga all[sagafn(), sagafn2(), ...]
+
