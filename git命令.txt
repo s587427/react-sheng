@@ -51,8 +51,6 @@ git pull [遠程庫別名][分支名稱] = fetch + merge
 git fetch [遠程庫地址或別名] [分支名稱]  --只是將遠程庫內容下載到本地，但是工作區還是原先的內容
 		ex: git push origin master
 
-
-
 在衝突情況下先拉下來解決在push上去
 
 --免密操作

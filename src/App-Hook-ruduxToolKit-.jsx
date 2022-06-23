@@ -2,6 +2,7 @@ import React, {useState, useCallback}  from 'react'
 import {useSelector, useDispatch, useStore} from 'react-redux'
 import {increment, decrement} from './redux/reducer/counterReducer'
 import {incrementForSlice, decrementForSlice, resetForSlice} from './redux/reducer/counterSlice'
+
 export default function App() {
   //hook
   const [count, setCount] = useState(0)
