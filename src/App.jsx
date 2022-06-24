@@ -4,6 +4,7 @@ import Expenses from './pages/Expenses.jsx'
 import Invoices from './pages/Invoices/Invoices.jsx'
 import InvoicesDetail from './pages/Invoices/InvoicesDetail.jsx'
 import Notfound from './pages/NotFound.jsx'
+import Book from './components/demo/Book.jsx'
 export default function App() {
   return (
     <div>
@@ -45,6 +46,9 @@ export default function App() {
 
 const Home = ()=>{
   return(
-    <h1 className="mt-5">This is Home</h1>
+    <>
+      <h1 className="mt-5">This is Home</h1>
+      <Book/>
+    </>
   )
 }
