@@ -15,8 +15,8 @@ const root = createRoot(rootElement);
 root.render(
     <Provider store={store}>
         <BrowserRouter>
-            {/* <App/> */}
-            <Hookform/>
+            <App/>
+            {/* <Hookform/> */}
         </BrowserRouter>   
     </Provider>
 )
