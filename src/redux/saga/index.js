@@ -16,11 +16,12 @@
  */
 
 import {all} from "redux-saga/effects"
-import { bookSaga } from "./bookSaga"
+import { bookSaga, bookSagaMutipleTake} from "./bookSaga"
 
 export function* rootSaga(){
     yield all([
-        bookSaga()
+        bookSaga(),
+        bookSagaMutipleTake()
     ])
 } 
 
