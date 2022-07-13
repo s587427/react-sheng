@@ -8,6 +8,7 @@ import App from './App.jsx'
 import Hookform from "./components/demo/Hookform.jsx";
 import Memo from './components/hook/Memo.jsx';
 import Ref from './components/hook/Ref.jsx';
+import Reducer from './components/hook/Reducer.jsx';
 const runenvirement = process.env.NODE_ENV
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
@@ -20,7 +21,8 @@ root.render(
                 {/* <App/> */}
                 {/* <Hookform/> */}
                 {/* <Memo /> */}
-                <Ref />
+                {/* <Ref /> */}
+                <Reducer/>
             </>
         </BrowserRouter>
     </Provider>
